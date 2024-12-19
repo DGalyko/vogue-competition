@@ -292,8 +292,12 @@ p {
   .container {
     @media (min-width: 1280px) {
       display: grid;
-      grid-template-columns: 1fr 1fr;
       grid-column-gap: 20px;
+      grid-template-columns: 1fr 1fr;
+    }
+    @media (max-width: 1279px) {
+      display: grid;
+      grid-gap: 40px;
     }
   }
   &__title {
@@ -330,6 +334,9 @@ p {
       &:hover {
         text-decoration: none;
       }
+    }
+    &_link {
+      padding-left: 20px;
     }
   }
 }
