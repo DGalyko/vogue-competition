@@ -252,6 +252,7 @@ p {
 .partners {
   position: sticky;
   top: 60px;
+  margin-bottom: 45px;
   z-index: 10;
   border-top: 1px solid #000000;
   border-bottom: 1px solid #000000;
@@ -265,16 +266,6 @@ p {
     justify-content: center;
     grid-gap: 80px;
     min-height: 80px;
-    @media (max-width: 1279px) {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      grid-gap: 0;
-      height: auto;
-      a {
-        display: flex;
-        justify-content: center;
-      }
-    }
   }
   a {
     display: flex;
@@ -395,7 +386,7 @@ p {
         font-style: normal;
         font-weight: 700;
         line-height: 18px;
-        text-transform: inherit;
+        text-transform: capitalize;
         color: #99CA3D;
       }
     }
