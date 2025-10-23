@@ -38,17 +38,6 @@ const speakers = () => {
 };
 speakers();
 
-const video = () => {
-    let video = document.querySelectorAll('.about__video');
-    video.forEach((item)  => {
-        item.muted = true;
-        item.play().catch(error => {
-            console.error('Автозапуск відео заблоковано:', error);
-        });
-    })
-}
-video();
-
 const initSliders = () => {
     const sliders = document.querySelectorAll(".tile__gallery_wrapper");
 
