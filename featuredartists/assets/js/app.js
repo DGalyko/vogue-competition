@@ -576,16 +576,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const prevBtn = popUp.querySelector(".popUp__scroll.prev");
     const nextBtn = popUp.querySelector(".popUp__scroll.next");
 
-// ------------------ Функція для оновлення кнопок навігації ------------------
     function updateScrollButtons() {
         prevBtn.style.display = imagesEl.scrollLeft > 0 ? "block" : "none";
-        nextBtn.style.display =
-            imagesEl.scrollLeft + imagesEl.clientWidth < imagesEl.scrollWidth
-                ? "block"
-                : "none";
+        nextBtn.style.display = imagesEl.scrollLeft + imagesEl.clientWidth < imagesEl.scrollWidth ? "block" : "none";
     }
 
-// ------------------ Кнопки прокрутки ------------------
     prevBtn.addEventListener("click", () => {
         const imgs = imagesEl.querySelectorAll("img");
         for (let i = imgs.length - 1; i >= 0; i--) {
@@ -608,90 +603,85 @@ document.addEventListener("DOMContentLoaded", () => {
 
     imagesEl.addEventListener("scroll", updateScrollButtons);
 
-// ------------------ Відкриття попапа ------------------
+    function openPopUp(person) {
+        titleEl.textContent = person.title;
+        descEl.innerHTML = person.description;
+        if (person.award) {
+            awardEl.textContent = person.award;
+            awardEl.style.display = "block";
+        } else {
+            awardEl.textContent = "";
+            awardEl.style.display = "none";
+        }
+        if (person.instagram && person.instagram.url) {
+            instagramEl.href = person.instagram.url;
+            instagramEl.textContent = person.instagram.text || "Instagram";
+            instagramEl.style.display = "inline-block";
+        } else {
+            instagramEl.href = "";
+            instagramEl.textContent = "";
+            instagramEl.style.display = "none";
+        }
+        imagesEl.innerHTML = "";
+        if (person.images && person.images.length > 0) {
+            let loadedCount = 0;
+            person.images.forEach(src => {
+                const img = document.createElement("img");
+                img.src = src;
+                img.alt = person.title;
+                img.classList.add("popUp__img");
+                img.onload = () => {
+                    loadedCount++;
+                    if (loadedCount === person.images.length) updateScrollButtons();
+                };
+                imagesEl.appendChild(img);
+            });
+        }
+        imagesEl.style.justifyContent = person.images.length < 4 ? "center" : "flex-start";
+        popUp.classList.add("active");
+        document.body.classList.add("modal-open");
+        imagesEl.scrollLeft = 0;
+        updateScrollButtons();
+        history.pushState({ person: person.number }, "", `${window.location.pathname}?person=${person.number}`);
+    }
+
     document.querySelectorAll(".main__list div").forEach(item => {
         item.addEventListener("click", () => {
             const num = parseInt(item.dataset.number, 10);
             const person = people.find(p => p.number === num);
             if (!person) return;
-
-            // Заголовок і опис
-            titleEl.textContent = person.title;
-            descEl.innerHTML = person.description;
-
-            // Нагороди
-            if (person.award) {
-                awardEl.textContent = person.award;
-                awardEl.style.display = "block";
-            } else {
-                awardEl.textContent = "";
-                awardEl.style.display = "none";
-            }
-
-            // Instagram
-            if (person.instagram && person.instagram.url) {
-                instagramEl.href = person.instagram.url;
-                instagramEl.textContent = person.instagram.text || "Instagram";
-                instagramEl.style.display = "inline-block";
-            } else {
-                instagramEl.href = "";
-                instagramEl.textContent = "";
-                instagramEl.style.display = "none";
-            }
-
-            // Галерея
-            imagesEl.innerHTML = "";
-            if (person.images && person.images.length > 0) {
-                let loadedCount = 0;
-                person.images.forEach(src => {
-                    const img = document.createElement("img");
-                    img.src = src;
-                    img.alt = person.title;
-                    img.classList.add("popUp__img");
-                    img.onload = () => {
-                        loadedCount++;
-                        if (loadedCount === person.images.length) {
-                            updateScrollButtons();
-                        }
-                    };
-                    imagesEl.appendChild(img);
-                });
-            }
-
-            imagesEl.style.justifyContent = person.images.length < 4 ? "center" : "flex-start";
-
-            // Відкриваємо попап
-            popUp.classList.add("active");
-            document.body.classList.add("modal-open");
-
-            // Прокрутка галереї у початок на випадок повторного відкриття
-            imagesEl.scrollLeft = 0;
-            updateScrollButtons();
+            openPopUp(person);
         });
     });
 
-// ------------------ Закриття попапа ------------------
     function closePopUp() {
-        if (!popUp) return;
-
         popUp.classList.remove("active");
         document.body.classList.remove("modal-open");
-
-        // Прокручування галереї до початку
-        if (imagesEl) {
-            imagesEl.scrollLeft = 0;
-        }
-
-        // Скидаємо кнопки навігації
+        imagesEl.scrollLeft = 0;
         updateScrollButtons();
+        history.pushState({}, "", window.location.pathname);
     }
 
-// ------------------ Підключаємо події закриття ------------------
     closeBtn.addEventListener("click", closePopUp);
-    popUp.addEventListener("click", e => {
-        if (e.target === popUp) closePopUp();
+    popUp.addEventListener("click", e => { if (e.target === popUp) closePopUp(); });
+
+    window.addEventListener("popstate", e => {
+        if (e.state && e.state.person) {
+            const person = people.find(p => p.number === e.state.person);
+            if (person) openPopUp(person);
+        } else {
+            closePopUp();
+        }
     });
 
+    window.addEventListener("load", () => {
+        const params = new URLSearchParams(window.location.search);
+        const personNum = parseInt(params.get("person"), 10);
+        if (personNum) {
+            const person = people.find(p => p.number === personNum);
+            if (person) openPopUp(person);
+        }
+    });
 
 });
 
