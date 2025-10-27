@@ -788,7 +788,7 @@ const setImages = () => {
         img.style.pointerEvents = 'none';
         img.style.transition = 'opacity 0.3s ease';
         img.style.display = 'block';
-        img.style.transform = `rotate(${Math.random() * 10 - 5}deg)`; // трохи “розкидано”
+        img.style.transform = 'rotate(0deg)';
     }
 
     // Звичайна перевірка перекриття
