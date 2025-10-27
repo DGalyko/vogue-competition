@@ -419,8 +419,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 "assets/img/Shkoda/5.jpg",
                 "assets/img/Shkoda/6.jpg",
                 "assets/img/Shkoda/7.jpg",
-                "assets/img/Shkoda/8.jpg",
-                "assets/img/Shkoda/9.jpg",
             ]
         },
         {
@@ -433,12 +431,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 "text": "@elenasubach"
             },
             images: [
-                "assets/img/Subach/1.jpg",
                 "assets/img/Subach/2.jpg",
                 "assets/img/Subach/3.jpg",
                 "assets/img/Subach/4.jpg",
                 "assets/img/Subach/5.jpg",
-                "assets/img/Subach/6.jpg",
                 "assets/img/Subach/7.jpg",
             ]
         },
@@ -580,11 +576,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const prevBtn = popUp.querySelector(".popUp__scroll.prev");
     const nextBtn = popUp.querySelector(".popUp__scroll.next");
 
+// ------------------ Функція для оновлення кнопок навігації ------------------
     function updateScrollButtons() {
         prevBtn.style.display = imagesEl.scrollLeft > 0 ? "block" : "none";
-        nextBtn.style.display = imagesEl.scrollLeft + imagesEl.clientWidth < imagesEl.scrollWidth ? "block" : "none";
+        nextBtn.style.display =
+            imagesEl.scrollLeft + imagesEl.clientWidth < imagesEl.scrollWidth
+                ? "block"
+                : "none";
     }
 
+// ------------------ Кнопки прокрутки ------------------
     prevBtn.addEventListener("click", () => {
         const imgs = imagesEl.querySelectorAll("img");
         for (let i = imgs.length - 1; i >= 0; i--) {
@@ -599,7 +600,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const imgs = imagesEl.querySelectorAll("img");
         for (let i = 0; i < imgs.length; i++) {
             if (imgs[i].offsetLeft + imgs[i].clientWidth > imagesEl.scrollLeft + imagesEl.clientWidth) {
-                imagesEl.scrollTo({ left: imagesEl.scrollLeft + imgs[i].clientWidth, behavior: "smooth" });
+                imagesEl.scrollTo({ left: imgs[i].offsetLeft, behavior: "smooth" });
                 break;
             }
         }
@@ -607,16 +608,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     imagesEl.addEventListener("scroll", updateScrollButtons);
 
+// ------------------ Відкриття попапа ------------------
     document.querySelectorAll(".main__list div").forEach(item => {
         item.addEventListener("click", () => {
             const num = parseInt(item.dataset.number, 10);
             const person = people.find(p => p.number === num);
             if (!person) return;
 
+            // Заголовок і опис
             titleEl.textContent = person.title;
             descEl.innerHTML = person.description;
 
-            // award
+            // Нагороди
             if (person.award) {
                 awardEl.textContent = person.award;
                 awardEl.style.display = "block";
@@ -625,7 +628,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 awardEl.style.display = "none";
             }
 
-            // instagram
+            // Instagram
             if (person.instagram && person.instagram.url) {
                 instagramEl.href = person.instagram.url;
                 instagramEl.textContent = person.instagram.text || "Instagram";
@@ -636,7 +639,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 instagramEl.style.display = "none";
             }
 
-            // images
+            // Галерея
             imagesEl.innerHTML = "";
             if (person.images && person.images.length > 0) {
                 let loadedCount = 0;
@@ -657,20 +660,38 @@ document.addEventListener("DOMContentLoaded", () => {
 
             imagesEl.style.justifyContent = person.images.length < 4 ? "center" : "flex-start";
 
+            // Відкриваємо попап
             popUp.classList.add("active");
             document.body.classList.add("modal-open");
+
+            // Прокрутка галереї у початок на випадок повторного відкриття
+            imagesEl.scrollLeft = 0;
+            updateScrollButtons();
         });
     });
 
+// ------------------ Закриття попапа ------------------
     function closePopUp() {
+        if (!popUp) return;
+
         popUp.classList.remove("active");
         document.body.classList.remove("modal-open");
+
+        // Прокручування галереї до початку
+        if (imagesEl) {
+            imagesEl.scrollLeft = 0;
+        }
+
+        // Скидаємо кнопки навігації
+        updateScrollButtons();
     }
 
+// ------------------ Підключаємо події закриття ------------------
     closeBtn.addEventListener("click", closePopUp);
     popUp.addEventListener("click", e => {
         if (e.target === popUp) closePopUp();
     });
+
 
 });
 
@@ -687,7 +708,6 @@ const setImages = () => {
         let timers = [];
 
         item.addEventListener('mouseenter', () => {
-            // 🔄 Оновлюємо актуальні позиції заборонених елементів (враховує скрол)
             const forbiddenRects = [mainList];
             if (header) forbiddenRects.push(header);
             if (footer) forbiddenRects.push(footer);
@@ -702,39 +722,42 @@ const setImages = () => {
 
             const viewportWidth = window.innerWidth;
             const viewportHeight = window.innerHeight;
-            const cellSize = 200;
-            const margin = 10;
-            const step = cellSize + margin;
-            const positions = [];
-
-            for (let x = 0; x <= viewportWidth - cellSize; x += step) {
-                for (let y = 0; y <= viewportHeight - cellSize; y += step) {
-                    positions.push({x, y});
-                }
-            }
-
-            shuffleArray(positions);
+            const minSize = 140;
+            const maxSize = 240;
+            const margin = 15;
+            const usedRects = [];
 
             imgs.forEach((img, index) => {
                 const timer = setTimeout(() => {
-                    for (let pos of positions) {
-                        const rect = {x: pos.x, y: pos.y, width: cellSize, height: cellSize};
-                        if (!forbiddenBounds.some(fb => rectsOverlap(rect, fb))) {
-                            img.style.opacity = 1;
-                            img.style.position = 'fixed';
-                            img.style.width = 'auto';
-                            img.style.height = 'auto';
-                            img.style.maxWidth = cellSize + 'px';
-                            img.style.maxHeight = cellSize + 'px';
-                            img.style.left = pos.x + 'px';
-                            img.style.top = pos.y + 'px';
-                            img.style.pointerEvents = 'none';
-                            img.style.transition = 'opacity 0.3s ease';
-                            img.style.display = 'block';
+                    let placed = false;
+                    let attempts = 0;
 
-                            positions.splice(positions.indexOf(pos), 1);
-                            break;
+                    while (!placed && attempts < 100) {
+                        attempts++;
+
+                        const cellSize = Math.floor(Math.random() * (maxSize - minSize + 1)) + minSize;
+
+                        const x = Math.floor(Math.random() * (viewportWidth - cellSize - margin));
+                        const y = Math.floor(Math.random() * (viewportHeight - cellSize - margin));
+
+                        const rect = { x, y, width: cellSize, height: cellSize };
+
+                        const overlapsForbidden = forbiddenBounds.some(fb => rectsOverlap(rect, fb));
+                        const overlapsOther = usedRects.some(r => rectsOverlapExpanded(rect, r, 20)); // трохи менше "страху" перекриття
+
+                        if (!overlapsForbidden && !overlapsOther) {
+                            placeImage(img, x, y, cellSize);
+                            usedRects.push(rect);
+                            placed = true;
                         }
+                    }
+
+                    // Якщо після 100 спроб не знайшло місце — ставимо все одно
+                    if (!placed) {
+                        const fallbackX = Math.random() * (viewportWidth - 200);
+                        const fallbackY = Math.random() * (viewportHeight - 200);
+                        const fallbackSize = Math.floor(Math.random() * (maxSize - minSize + 1)) + minSize;
+                        placeImage(img, fallbackX, fallbackY, fallbackSize);
                     }
                 }, index * 150);
                 timers.push(timer);
@@ -754,6 +777,23 @@ const setImages = () => {
         });
     });
 
+    // Функція для розміщення картинки
+    function placeImage(img, x, y, size) {
+        img.style.opacity = 1;
+        img.style.position = 'fixed';
+        img.style.width = 'auto';
+        img.style.height = 'auto';
+        img.style.maxWidth = size + 'px';
+        img.style.maxHeight = size + 'px';
+        img.style.left = x + 'px';
+        img.style.top = y + 'px';
+        img.style.pointerEvents = 'none';
+        img.style.transition = 'opacity 0.3s ease';
+        img.style.display = 'block';
+        img.style.transform = `rotate(${Math.random() * 10 - 5}deg)`; // трохи “розкидано”
+    }
+
+    // Звичайна перевірка перекриття
     function rectsOverlap(r1, r2) {
         return !(
             r1.x + r1.width < r2.left ||
@@ -763,6 +803,17 @@ const setImages = () => {
         );
     }
 
+    // Трохи м'якша перевірка (з відступом)
+    function rectsOverlapExpanded(r1, r2, padding = 0) {
+        return !(
+            r1.x + r1.width + padding < r2.x ||
+            r1.x > r2.x + r2.width + padding ||
+            r1.y + r1.height + padding < r2.y ||
+            r1.y > r2.y + r2.height + padding
+        );
+    }
+
+    // Перемішування масиву
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -772,3 +823,6 @@ const setImages = () => {
 };
 
 setImages();
+
+
+
