@@ -731,19 +731,19 @@ const setImages = () => {
                 const timer = setTimeout(() => {
                     let placed = false;
                     let attempts = 0;
+                    const maxAttempts = 100;
 
-                    while (!placed && attempts < 100) {
+                    while (!placed && attempts < maxAttempts) {
                         attempts++;
 
                         const cellSize = Math.floor(Math.random() * (maxSize - minSize + 1)) + minSize;
-
                         const x = Math.floor(Math.random() * (viewportWidth - cellSize - margin));
                         const y = Math.floor(Math.random() * (viewportHeight - cellSize - margin));
 
                         const rect = { x, y, width: cellSize, height: cellSize };
 
                         const overlapsForbidden = forbiddenBounds.some(fb => rectsOverlap(rect, fb));
-                        const overlapsOther = usedRects.some(r => rectsOverlapExpanded(rect, r, 20)); // трохи менше "страху" перекриття
+                        const overlapsOther = usedRects.some(r => rectsOverlapExpanded(rect, r, 20));
 
                         if (!overlapsForbidden && !overlapsOther) {
                             placeImage(img, x, y, cellSize);
@@ -752,16 +752,14 @@ const setImages = () => {
                         }
                     }
 
-                    // Якщо після 100 спроб не знайшло місце — ставимо все одно
+                    // Якщо після maxAttempts не знайшло місце — не показуємо картинку
                     if (!placed) {
-                        const fallbackX = Math.random() * (viewportWidth - 200);
-                        const fallbackY = Math.random() * (viewportHeight - 200);
-                        const fallbackSize = Math.floor(Math.random() * (maxSize - minSize + 1)) + minSize;
-                        placeImage(img, fallbackX, fallbackY, fallbackSize);
+                        img.style.display = 'none';
                     }
                 }, index * 150);
                 timers.push(timer);
             });
+
         });
 
         item.addEventListener('mouseleave', () => {
