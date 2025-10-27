@@ -723,7 +723,7 @@ const setImages = () => {
             const viewportWidth = window.innerWidth;
             const viewportHeight = window.innerHeight;
             const minSize = 140;
-            const maxSize = 240;
+            const maxSize = 380;
             const margin = 15;
             const usedRects = [];
 
