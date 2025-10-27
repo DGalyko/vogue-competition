@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="dbde7a95-eb52-4ab2-84ec-d937ec8d3ffb" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/featuredartists/assets/img/top_logo.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/featuredartists/assets/img/top_logo2.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gulpfile.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rollup.config.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/scss/layout/_layout.scss" beforeDir="false" afterPath="$PROJECT_DIR$/assets/scss/layout/_layout.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/featuredartists/assets/img/Shkoda/6.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/featuredartists/assets/img/Shkoda/6.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/featuredartists/assets/img/Shkoda/8.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/featuredartists/assets/img/Shkoda/9.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/featuredartists/assets/js/app-en.js" beforeDir="false" afterPath="$PROJECT_DIR$/featuredartists/assets/js/app-en.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/featuredartists/assets/js/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/featuredartists/assets/js/app.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/featuredartists/index-en.html" beforeDir="false" afterPath="$PROJECT_DIR$/featuredartists/index-en.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/featuredartists/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/featuredartists/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/index-en.html" beforeDir="false" afterPath="$PROJECT_DIR$/index-en.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/style/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/style/style.css" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ComposerSettings">
+    <execution />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="PhpWorkspaceProjectConfiguration" interpreter_name="/usr/local/Cellar/php/8.3.4/bin/php" />
+  <component name="ProjectId" id="34QJKpBMfq0uISNhVZSbWdH9ZFY" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "true",
+    "js.buildTools.gulp.gulp_package_dir": "/Users/andrey/Documents/trku/vogue-competition/node_modules/gulp",
+    "last_opened_file_path": "/Users/andrey/Documents/trku/vogue-competition/featuredartists/assets/img",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/featuredartists/assets/img" />
+      <recent name="$PROJECT_DIR$/featuredartists/assets/img/Shkoda" />
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/assets/img" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration default="true" type="js.build_tools.gulp">
+      <node-interpreter>project</node-interpreter>
+      <node-options />
+      <gulpfile />
+      <tasks />
+      <arguments />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <configuration name="devStyles" type="js.build_tools.gulp" temporary="true">
+      <node-interpreter>project</node-interpreter>
+      <node-options />
+      <gulpfile>$PROJECT_DIR$/gulpfile.js</gulpfile>
+      <tasks>
+        <task>devStyles</task>
+      </tasks>
+      <arguments />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Gulp.js.devStyles" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="dbde7a95-eb52-4ab2-84ec-d937ec8d3ffb" name="Changes" comment="" />
+      <created>1761139800106</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1761139800106</updated>
+      <workItem from="1761139801427" duration="7942000" />
+      <workItem from="1761567904702" duration="548000" />
+      <workItem from="1761568898521" duration="3181000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

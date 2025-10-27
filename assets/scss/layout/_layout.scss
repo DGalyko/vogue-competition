@@ -40,6 +40,10 @@ p {
   margin: 0;
 }
 
+strong {
+  font-weight: 700;
+}
+
 .container {
   max-width: 1180px;
   margin: 0 auto;
@@ -259,8 +263,6 @@ p {
 }
 
 .partners {
-  position: sticky;
-  top: 60px;
   margin-bottom: 45px;
   z-index: 10;
   border-top: 1px solid #000000;
@@ -269,22 +271,32 @@ p {
   @media (max-width: 767px) {
     top: -1px;
   }
+  @media (min-width: 1280px) {
+    position: sticky;
+    top: 60px;
+  }
   .container {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     justify-content: center;
     grid-gap: 20px;
     min-height: 80px;
+    max-width: 1300px;
+    padding: 10px 0;
     @media (min-width: 768px) {
       grid-gap: 40px;
+    }
+    @media (min-width: 1280px) {
+      padding: 0;
     }
   }
   a {
     display: flex;
     img {
-      max-height: 78px;
-      @media (min-width: 768px) AND (max-width: 1280px) {
-        max-height: 78px;
+      max-height: 50px;
+      @media (min-width: 1280px) {
+        max-height: 70px;
       }
     }
   }
