@@ -681,133 +681,128 @@ document.addEventListener("DOMContentLoaded", () => {
             if (person) openPopUp(person);
         }
     });
+    const setImages = () => {
+        if (window.innerWidth < 1280) return;
 
-});
+        const listItems = document.querySelectorAll('.main__list div');
+        const images = document.querySelectorAll('.images img');
+        const mainList = document.querySelector('.main__list');
+        const header = document.querySelector('.header');
+        const footer = document.querySelector('.footer');
 
-const setImages = () => {
-    if (window.innerWidth < 1280) return;
+        listItems.forEach(item => {
+            let timers = [];
 
-    const listItems = document.querySelectorAll('.main__list div');
-    const images = document.querySelectorAll('.images img');
-    const mainList = document.querySelector('.main__list');
-    const header = document.querySelector('.header');
-    const footer = document.querySelector('.footer');
+            item.addEventListener('mouseenter', () => {
+                const forbiddenRects = [mainList];
+                if (header) forbiddenRects.push(header);
+                if (footer) forbiddenRects.push(footer);
+                const forbiddenBounds = forbiddenRects.map(el => el.getBoundingClientRect());
 
-    listItems.forEach(item => {
-        let timers = [];
+                const num = item.dataset.number;
+                let imgs = Array.from(images).filter(img => img.dataset.number === num);
+                if (!imgs.length) return;
 
-        item.addEventListener('mouseenter', () => {
-            const forbiddenRects = [mainList];
-            if (header) forbiddenRects.push(header);
-            if (footer) forbiddenRects.push(footer);
-            const forbiddenBounds = forbiddenRects.map(el => el.getBoundingClientRect());
+                shuffleArray(imgs);
+                imgs = imgs.slice(0, Math.min(imgs.length, 5));
 
-            const num = item.dataset.number;
-            let imgs = Array.from(images).filter(img => img.dataset.number === num);
-            if (!imgs.length) return;
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+                const minSize = 100;
+                const maxSize = 350;
+                const margin = 10;
+                const gridStep = 20;
+                const usedRects = [];
 
-            shuffleArray(imgs);
-            imgs = imgs.slice(0, Math.min(imgs.length, 5));
-
-            const viewportWidth = window.innerWidth;
-            const viewportHeight = window.innerHeight;
-            const minSize = 140;
-            const maxSize = 350;
-            const margin = 10;
-            const usedRects = [];
-
-            imgs.forEach((img, index) => {
-                const timer = setTimeout(() => {
-                    const minSize = 100;
-                    const maxSize = 350;
-                    let cellSize = Math.floor(Math.random() * (maxSize - minSize + 1)) + minSize;
-
-                    let x, y;
-                    let safe = false;
-                    let attempts = 0;
-                    const maxAttempts = 50;
-
-                    while (!safe && cellSize >= minSize) {
-                        attempts++;
-                        x = Math.floor(Math.random() * (viewportWidth - cellSize - 10));
-                        y = Math.floor(Math.random() * (viewportHeight - cellSize - 10));
-
-                        const rect = { x, y, width: cellSize, height: cellSize };
-                        const overlapsForbidden = forbiddenBounds.some(fb => rectsOverlap(rect, fb));
-                        const overlapsOther = usedRects.some(r => rectsOverlapExpanded(rect, r, 20));
-
-                        if (!overlapsForbidden && !overlapsOther) {
-                            safe = true;
-                            break;
-                        }
-
-                        if (attempts >= maxAttempts) {
-                            cellSize = Math.max(minSize, cellSize - 20);
-                            attempts = 0;
+                const generatePositions = (size) => {
+                    const positions = [];
+                    for (let x = margin; x <= viewportWidth - size - margin; x += gridStep) {
+                        for (let y = margin; y <= viewportHeight - size - margin; y += gridStep) {
+                            positions.push({ x, y });
                         }
                     }
+                    shuffleArray(positions);
+                    return positions;
+                };
 
-                    placeImage(img, x, y, cellSize);
-                    usedRects.push({ x, y, width: cellSize, height: cellSize });
+                imgs.forEach((img, index) => {
+                    const timer = setTimeout(() => {
+                        let cellSize = Math.floor(Math.random() * (maxSize - minSize + 1)) + minSize;
+                        let placed = false;
 
-                }, index * 150);
-                timers.push(timer);
+                        while (!placed && cellSize >= minSize) {
+                            const positions = generatePositions(cellSize);
+                            for (let pos of positions) {
+                                const rect = { x: pos.x, y: pos.y, width: cellSize, height: cellSize };
+                                const overlapsForbidden = forbiddenBounds.some(fb => rectsOverlap(rect, fb));
+                                const overlapsOther = usedRects.some(r => rectsOverlapExpanded(rect, r, 20));
+
+                                if (!overlapsForbidden && !overlapsOther) {
+                                    placeImage(img, pos.x, pos.y, cellSize);
+                                    usedRects.push({ x: pos.x, y: pos.y, width: cellSize, height: cellSize });
+                                    placed = true;
+                                    break;
+                                }
+                            }
+                            if (!placed) cellSize = cellSize - 20;
+                        }
+                    }, index * 150);
+                    timers.push(timer);
+                });
             });
 
-        });
-
-        item.addEventListener('mouseleave', () => {
-            timers.forEach(timer => clearTimeout(timer));
-            timers = [];
-
-            images.forEach(img => {
-                if (img.dataset.number === item.dataset.number) {
-                    img.style.opacity = 0;
-                    setTimeout(() => (img.style.display = 'none'), 300);
-                }
+            item.addEventListener('mouseleave', () => {
+                timers.forEach(timer => clearTimeout(timer));
+                timers = [];
+                images.forEach(img => {
+                    if (img.dataset.number === item.dataset.number) {
+                        img.style.opacity = 0;
+                        setTimeout(() => (img.style.display = 'none'), 300);
+                    }
+                });
             });
         });
-    });
 
-    function placeImage(img, x, y, size) {
-        img.style.opacity = 1;
-        img.style.position = 'fixed';
-        img.style.width = 'auto';
-        img.style.height = 'auto';
-        img.style.maxWidth = size + 'px';
-        img.style.maxHeight = size + 'px';
-        img.style.left = x + 'px';
-        img.style.top = y + 'px';
-        img.style.pointerEvents = 'none';
-        img.style.transition = 'opacity 0.3s ease';
-        img.style.display = 'block';
-        img.style.transform = 'rotate(0deg)';
-    }
-
-    function rectsOverlap(r1, r2) {
-        return !(
-            r1.x + r1.width < r2.left ||
-            r1.x > r2.right ||
-            r1.y + r1.height < r2.top ||
-            r1.y > r2.bottom
-        );
-    }
-
-    function rectsOverlapExpanded(r1, r2, padding = 0) {
-        return !(
-            r1.x + r1.width + padding < r2.x ||
-            r1.x > r2.x + r2.width + padding ||
-            r1.y + r1.height + padding < r2.y ||
-            r1.y > r2.y + r2.height + padding
-        );
-    }
-
-    function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
+        function placeImage(img, x, y, size) {
+            img.style.opacity = 1;
+            img.style.position = 'fixed';
+            img.style.width = 'auto';
+            img.style.height = 'auto';
+            img.style.maxWidth = size + 'px';
+            img.style.maxHeight = size + 'px';
+            img.style.left = x + 'px';
+            img.style.top = y + 'px';
+            img.style.pointerEvents = 'none';
+            img.style.transition = 'opacity 0.3s ease';
+            img.style.display = 'block';
+            img.style.transform = 'rotate(0deg)';
         }
-    }
-};
 
-setImages();
+        function rectsOverlap(r1, r2) {
+            return !(
+                r1.x + r1.width < r2.left ||
+                r1.x > r2.right ||
+                r1.y + r1.height < r2.top ||
+                r1.y > r2.bottom
+            );
+        }
+
+        function rectsOverlapExpanded(r1, r2, padding = 0) {
+            return !(
+                r1.x + r1.width + padding < r2.x ||
+                r1.x > r2.x + r2.width + padding ||
+                r1.y + r1.height + padding < r2.y ||
+                r1.y > r2.y + r2.height + padding
+            );
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+    };
+
+    setImages();
+});
