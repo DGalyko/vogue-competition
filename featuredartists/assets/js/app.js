@@ -583,8 +583,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     prevBtn.addEventListener("click", () => {
         const imgs = imagesEl.querySelectorAll("img");
+        if (!imgs.length) return;
+        let scrollPos = imagesEl.scrollLeft;
         for (let i = imgs.length - 1; i >= 0; i--) {
-            if (imgs[i].offsetLeft < imagesEl.scrollLeft) {
+            if (imgs[i].offsetLeft < scrollPos) {
                 imagesEl.scrollTo({ left: imgs[i].offsetLeft, behavior: "smooth" });
                 break;
             }
@@ -593,8 +595,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     nextBtn.addEventListener("click", () => {
         const imgs = imagesEl.querySelectorAll("img");
+        if (!imgs.length) return;
+        let scrollPos = imagesEl.scrollLeft;
         for (let i = 0; i < imgs.length; i++) {
-            if (imgs[i].offsetLeft + imgs[i].clientWidth > imagesEl.scrollLeft + imagesEl.clientWidth) {
+            if (imgs[i].offsetLeft > scrollPos) {
                 imagesEl.scrollTo({ left: imgs[i].offsetLeft, behavior: "smooth" });
                 break;
             }
@@ -624,16 +628,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         imagesEl.innerHTML = "";
         if (person.images && person.images.length > 0) {
-            let loadedCount = 0;
             person.images.forEach(src => {
                 const img = document.createElement("img");
                 img.src = src;
                 img.alt = person.title;
                 img.classList.add("popUp__img");
-                img.onload = () => {
-                    loadedCount++;
-                    if (loadedCount === person.images.length) updateScrollButtons();
-                };
+                img.onload = () => { img.style.display = 'block'; img.style.opacity = 1; };
                 imagesEl.appendChild(img);
             });
         }
@@ -643,15 +643,6 @@ document.addEventListener("DOMContentLoaded", () => {
         updateScrollButtons();
         history.pushState({ person: person.number }, "", `${window.location.pathname}?person=${person.number}`);
     }
-
-    document.querySelectorAll(".main__list div").forEach(item => {
-        item.addEventListener("click", () => {
-            const num = parseInt(item.dataset.number, 10);
-            const person = people.find(p => p.number === num);
-            if (!person) return;
-            openPopUp(person);
-        });
-    });
 
     function closePopUp() {
         popUp.classList.remove("active");
@@ -668,9 +659,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.state && e.state.person) {
             const person = people.find(p => p.number === e.state.person);
             if (person) openPopUp(person);
-        } else {
-            closePopUp();
-        }
+        } else closePopUp();
     });
 
     window.addEventListener("load", () => {
@@ -681,119 +670,201 @@ document.addEventListener("DOMContentLoaded", () => {
             if (person) openPopUp(person);
         }
     });
-    const setImages = () => {
-        if (window.innerWidth < 1280) return;
 
+    const setImages = () => {
         const listItems = document.querySelectorAll('.main__list div');
         const images = document.querySelectorAll('.images img');
         const mainList = document.querySelector('.main__list');
         const header = document.querySelector('.header');
         const footer = document.querySelector('.footer');
 
-        listItems.forEach(item => {
+        if (window.innerWidth >= 1280) {
+            listItems.forEach(item => {
+                let timers = [];
+                item.addEventListener('mouseenter', () => showImages(item, images, mainList, header, footer, timers));
+                item.addEventListener('mouseleave', () => hideImages(item, images, timers));
+                item.addEventListener('click', () => {
+                    const num = item.dataset.number;
+                    const person = people.find(p => p.number === parseInt(num, 10));
+                    if (person) openPopUp(person);
+                });
+            });
+        } else {
+            let activeBlock = null;
             let timers = [];
+            listItems.forEach(item => {
+                item.addEventListener('click', e => {
+                    e.stopPropagation();
+                    const num = item.dataset.number;
+                    const imgs = Array.from(images).filter(img => img.dataset.number === num).slice(0, 5);
+                    if (!imgs.length) return;
+                    if (popUp.classList.contains('active')) return;
+                    if (activeBlock && activeBlock !== item) {
+                        images.forEach(img => img.style.display = 'none');
+                        listItems.forEach(i => i.style.color = '');
+                        timers.forEach(timer => clearTimeout(timer));
+                        timers = [];
+                        activeBlock = null;
+                    }
+                    if (activeBlock === item) {
+                        const person = people.find(p => p.number === parseInt(num, 10));
+                        if (person) openPopUp(person);
+                        images.forEach(img => img.style.display = 'none');
+                        listItems.forEach(i => i.style.color = '');
+                        timers.forEach(timer => clearTimeout(timer));
+                        timers = [];
+                        activeBlock = null;
+                        return;
+                    }
+                    activeBlock = item;
+                    listItems.forEach(i => i.style.color = '');
+                    item.style.color = '#99CA3D';
+                    showMobileImages(imgs);
+                });
+            });
 
-            item.addEventListener('mouseenter', () => {
+            document.addEventListener('click', () => {
+                if (activeBlock) {
+                    images.forEach(img => img.style.display = 'none');
+                    listItems.forEach(i => i.style.color = '');
+                    timers.forEach(timer => clearTimeout(timer));
+                    timers = [];
+                    activeBlock = null;
+                }
+            });
+
+            function showMobileImages(imgs) {
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
                 const forbiddenRects = [mainList];
                 if (header) forbiddenRects.push(header);
                 if (footer) forbiddenRects.push(footer);
+                document.querySelectorAll('.main__list div').forEach(div => forbiddenRects.push(div));
                 const forbiddenBounds = forbiddenRects.map(el => el.getBoundingClientRect());
-
-                const num = item.dataset.number;
-                let imgs = Array.from(images).filter(img => img.dataset.number === num);
-                if (!imgs.length) return;
-
-                shuffleArray(imgs);
-                imgs = imgs.slice(0, Math.min(imgs.length, 5));
-
-                const viewportWidth = window.innerWidth;
-                const viewportHeight = window.innerHeight;
-                const minSize = 100;
-                const maxSize = 350;
-                const margin = 10;
-                const gridStep = 20;
                 const usedRects = [];
 
-                const generatePositions = (size) => {
-                    const positions = [];
-                    for (let x = margin; x <= viewportWidth - size - margin; x += gridStep) {
-                        for (let y = margin; y <= viewportHeight - size - margin; y += gridStep) {
-                            positions.push({ x, y });
+                imgs.forEach(img => {
+                    let size = Math.min(180, viewportWidth / 2.2);
+                    size = Math.max(size, 100);
+                    let placed = false;
+                    let attempts = 0;
+
+                    while (!placed && size >= 40) {
+                        attempts++;
+                        const x = Math.random() * (viewportWidth - size);
+                        const y = Math.random() * (viewportHeight - size);
+                        const rectImg = { x, y, width: size, height: size };
+                        const overlapsForbidden = forbiddenBounds.some(fb => rectsOverlap(rectImg, fb));
+                        const overlapsOther = usedRects.some(r => rectsOverlapExpanded(rectImg, r, 10));
+
+                        if (!overlapsForbidden && !overlapsOther) {
+                            const scale = 1.2 + Math.random() * 0.6;
+                            img.style.display = 'block';
+                            img.style.opacity = 1;
+                            img.style.transform = `rotate(0deg) scale(${scale})`;
+                            img.style.position = 'fixed';
+                            img.style.maxWidth = size + 'px';
+                            img.style.maxHeight = size + 'px';
+                            img.style.left = x + 'px';
+                            img.style.top = y + 'px';
+                            img.style.pointerEvents = 'none';
+                            img.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                            usedRects.push(rectImg);
+                            placed = true;
+                        }
+
+                        if (!placed && attempts >= 50) {
+                            size -= 10;
+                            attempts = 0;
                         }
                     }
-                    shuffleArray(positions);
-                    return positions;
-                };
 
-                imgs.forEach((img, index) => {
-                    const timer = setTimeout(() => {
-                        let cellSize = Math.floor(Math.random() * (maxSize - minSize + 1)) + minSize;
-                        let placed = false;
+                    if (!placed) img.style.display = 'none';
+                });
+            }
+        }
 
-                        while (!placed && cellSize >= minSize) {
-                            const positions = generatePositions(cellSize);
-                            for (let pos of positions) {
-                                const rect = { x: pos.x, y: pos.y, width: cellSize, height: cellSize };
-                                const overlapsForbidden = forbiddenBounds.some(fb => rectsOverlap(rect, fb));
-                                const overlapsOther = usedRects.some(r => rectsOverlapExpanded(rect, r, 20));
+        function showImages(item, images, mainList, header, footer, timers) {
+            const forbiddenRects = [mainList];
+            if (header) forbiddenRects.push(header);
+            if (footer) forbiddenRects.push(footer);
+            document.querySelectorAll('.main__list div').forEach(div => forbiddenRects.push(div));
+            const forbiddenBounds = forbiddenRects.map(el => el.getBoundingClientRect());
 
-                                if (!overlapsForbidden && !overlapsOther) {
-                                    placeImage(img, pos.x, pos.y, cellSize);
-                                    usedRects.push({ x: pos.x, y: pos.y, width: cellSize, height: cellSize });
-                                    placed = true;
-                                    break;
-                                }
+            const num = item.dataset.number;
+            let imgs = Array.from(images).filter(img => img.dataset.number === num);
+            if (!imgs.length) return;
+
+            shuffleArray(imgs);
+            imgs = imgs.slice(0, Math.min(imgs.length, 5));
+
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            const minSize = 100;
+            const maxSize = 350;
+            const margin = 10;
+            const gridStep = 20;
+            const usedRects = [];
+
+            imgs.forEach((img, index) => {
+                const timer = setTimeout(() => {
+                    let cellSize = Math.floor(Math.random() * (maxSize - minSize + 1)) + minSize;
+                    let placed = false;
+
+                    while (!placed && cellSize >= minSize) {
+                        const positions = [];
+                        for (let x = margin; x <= viewportWidth - cellSize - margin; x += gridStep) {
+                            for (let y = margin; y <= viewportHeight - cellSize - margin; y += gridStep) {
+                                positions.push({ x, y });
                             }
-                            if (!placed) cellSize = cellSize - 20;
                         }
-                    }, index * 150);
-                    timers.push(timer);
-                });
-            });
+                        shuffleArray(positions);
 
-            item.addEventListener('mouseleave', () => {
-                timers.forEach(timer => clearTimeout(timer));
-                timers = [];
-                images.forEach(img => {
-                    if (img.dataset.number === item.dataset.number) {
-                        img.style.opacity = 0;
-                        setTimeout(() => (img.style.display = 'none'), 300);
+                        for (let pos of positions) {
+                            const rect = { x: pos.x, y: pos.y, width: cellSize, height: cellSize };
+                            const overlapsForbidden = forbiddenBounds.some(fb => rectsOverlap(rect, fb));
+                            const overlapsOther = usedRects.some(r => rectsOverlapExpanded(rect, r, 20));
+
+                            if (!overlapsForbidden && !overlapsOther) {
+                                img.style.display = 'block';
+                                img.style.opacity = 1;
+                                img.style.transform = 'rotate(0deg) scale(1)';
+                                img.style.position = 'fixed';
+                                img.style.maxWidth = cellSize + 'px';
+                                img.style.maxHeight = cellSize + 'px';
+                                img.style.left = pos.x + 'px';
+                                img.style.top = pos.y + 'px';
+                                img.style.pointerEvents = 'none';
+                                img.style.transition = 'opacity 0.3s ease';
+                                usedRects.push({ x: pos.x, y: pos.y, width: cellSize, height: cellSize });
+                                placed = true;
+                                break;
+                            }
+                        }
+                        if (!placed) cellSize -= 20;
                     }
-                });
+                }, index * 150);
+                timers.push(timer);
             });
-        });
+        }
 
-        function placeImage(img, x, y, size) {
-            img.style.opacity = 1;
-            img.style.position = 'fixed';
-            img.style.width = 'auto';
-            img.style.height = 'auto';
-            img.style.maxWidth = size + 'px';
-            img.style.maxHeight = size + 'px';
-            img.style.left = x + 'px';
-            img.style.top = y + 'px';
-            img.style.pointerEvents = 'none';
-            img.style.transition = 'opacity 0.3s ease';
-            img.style.display = 'block';
-            img.style.transform = 'rotate(0deg)';
+        function hideImages(item, images, timers) {
+            timers.forEach(timer => clearTimeout(timer));
+            timers = [];
+            images.forEach(img => {
+                if (img.dataset.number === item.dataset.number) {
+                    img.style.opacity = 0;
+                    setTimeout(() => img.style.display = 'none', 300);
+                }
+            });
         }
 
         function rectsOverlap(r1, r2) {
-            return !(
-                r1.x + r1.width < r2.left ||
-                r1.x > r2.right ||
-                r1.y + r1.height < r2.top ||
-                r1.y > r2.bottom
-            );
+            return !(r1.x + r1.width < r2.left || r1.x > r2.right || r1.y + r1.height < r2.top || r1.y > r2.bottom);
         }
 
         function rectsOverlapExpanded(r1, r2, padding = 0) {
-            return !(
-                r1.x + r1.width + padding < r2.x ||
-                r1.x > r2.x + r2.width + padding ||
-                r1.y + r1.height + padding < r2.y ||
-                r1.y > r2.y + r2.height + padding
-            );
+            return !(r1.x + r1.width + padding < r2.x || r1.x > r2.x + r2.width + padding || r1.y + r1.height + padding < r2.y || r1.y > r2.y + r2.height + padding);
         }
 
         function shuffleArray(array) {
@@ -805,4 +876,5 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     setImages();
+
 });
