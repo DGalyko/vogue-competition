@@ -637,7 +637,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 imagesEl.appendChild(img);
             });
         }
-        imagesEl.style.justifyContent = person.images.length < 4 ? "center" : "flex-start";
         popUp.classList.add("active");
         document.body.classList.add("modal-open");
         imagesEl.scrollLeft = 0;
@@ -718,33 +717,38 @@ const setImages = () => {
 
             imgs.forEach((img, index) => {
                 const timer = setTimeout(() => {
-                    let placed = false;
+                    const minSize = 100;
+                    const maxSize = 350;
+                    let cellSize = Math.floor(Math.random() * (maxSize - minSize + 1)) + minSize;
+
+                    let x, y;
+                    let safe = false;
                     let attempts = 0;
-                    const maxAttempts = 100;
+                    const maxAttempts = 50;
 
-                    while (!placed && attempts < maxAttempts) {
+                    while (!safe && cellSize >= minSize) {
                         attempts++;
-
-                        const cellSize = Math.floor(Math.random() * (maxSize - minSize + 1)) + minSize;
-                        const x = Math.floor(Math.random() * (viewportWidth - cellSize - margin));
-                        const y = Math.floor(Math.random() * (viewportHeight - cellSize - margin));
+                        x = Math.floor(Math.random() * (viewportWidth - cellSize - 10));
+                        y = Math.floor(Math.random() * (viewportHeight - cellSize - 10));
 
                         const rect = { x, y, width: cellSize, height: cellSize };
-
                         const overlapsForbidden = forbiddenBounds.some(fb => rectsOverlap(rect, fb));
                         const overlapsOther = usedRects.some(r => rectsOverlapExpanded(rect, r, 20));
 
                         if (!overlapsForbidden && !overlapsOther) {
-                            placeImage(img, x, y, cellSize);
-                            usedRects.push(rect);
-                            placed = true;
+                            safe = true;
+                            break;
+                        }
+
+                        if (attempts >= maxAttempts) {
+                            cellSize = Math.max(minSize, cellSize - 20);
+                            attempts = 0;
                         }
                     }
 
-                    // Якщо після maxAttempts не знайшло місце — не показуємо картинку
-                    if (!placed) {
-                        img.style.display = 'none';
-                    }
+                    placeImage(img, x, y, cellSize);
+                    usedRects.push({ x, y, width: cellSize, height: cellSize });
+
                 }, index * 150);
                 timers.push(timer);
             });
@@ -764,7 +768,6 @@ const setImages = () => {
         });
     });
 
-    // Функція для розміщення картинки
     function placeImage(img, x, y, size) {
         img.style.opacity = 1;
         img.style.position = 'fixed';
@@ -780,7 +783,6 @@ const setImages = () => {
         img.style.transform = 'rotate(0deg)';
     }
 
-    // Звичайна перевірка перекриття
     function rectsOverlap(r1, r2) {
         return !(
             r1.x + r1.width < r2.left ||
@@ -790,7 +792,6 @@ const setImages = () => {
         );
     }
 
-    // Трохи м'якша перевірка (з відступом)
     function rectsOverlapExpanded(r1, r2, padding = 0) {
         return !(
             r1.x + r1.width + padding < r2.x ||
@@ -800,7 +801,6 @@ const setImages = () => {
         );
     }
 
-    // Перемішування масиву
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
