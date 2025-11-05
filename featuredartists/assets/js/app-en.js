@@ -477,7 +477,7 @@ document.addEventListener("DOMContentLoaded", () => {
         {
             "number": 29,
             "title": "Anya Tsaruk, 27",
-            "description": "Kyiv-born Anya Tsaruk examines identity, community, migration, and trauma. Her work Sandbags in Front of the Church of the Most Holy Eucharist in Lviv, from the series I Hope Your Family Is Safe (2023), was photographed in Lviv, where Tsaruk — who has lived in Berlin for nine years — returned to document life in the country during the war. Her work offers a tender, deeply sensitive perspective on contemporary Ukraine.",
+            "description": "Khmelnytskyi-born Anya Tsaruk examines identity, community, migration, and trauma. Her work “Sandbags in Front of the Church of the Holy Eucharist in Lviv” is part of the ongoing series “I Hope Your Family is Safe”. In this project, the photographer, who has lived in Berlin for the past ten years, documents the life of her homeland in the midst of war. Tsaruk's work offers a tender and deeply sensitive perspective on contemporary Ukraine.",
             "instagram": {
                 "url": "https://www.instagram.com/anyatsaruuk/",
                 "text": "@anyatsaruuk"
